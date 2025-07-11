@@ -8,7 +8,7 @@ open FunSeeker.Tailcall
 let printFunctions cache =
   cache.FunctionCache
   |> Seq.iter (fun addr ->
-    printf "%x\n" addr
+    printf "FunctionEntry: %x\n" addr
   )
   0
 
