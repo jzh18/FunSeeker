@@ -29,16 +29,21 @@ let addCallTarget cache (ins: Instruction) =
       Cache.setCallTargetCache cache target
 
 let addJumpTarget cache (ins: Instruction) =
-  let intelInst = ins :?> IntelInstruction
-  match intelInst.Opcode with
-  | Opcode.JMPFar | Opcode.JMPNear ->
-    match ins.DirectBranchTarget () |> Utils.tupleToOpt with
-    | None -> ()
-    | Some target ->
-      if isTextAddr cache.Handle target then
-        Cache.setJumpCache cache ins.Address target
-        Cache.setJumpTargetRefCache cache target ins.Address
-  | _ -> ()
+  try
+    let intelInst = ins :?> IntelInstruction
+    match intelInst.Opcode with
+    | Opcode.JMPFar | Opcode.JMPNear ->
+      match ins.DirectBranchTarget () |> Utils.tupleToOpt with
+      | None -> ()
+      | Some target ->
+        if isTextAddr cache.Handle target then
+          Cache.setJumpCache cache ins.Address target
+          Cache.setJumpTargetRefCache cache target ins.Address
+    | _ -> ()
+  with 
+  // pritint warning when catching NotImplementedException
+  | :? System.NotImplementedException -> 
+    printfn "Warning: Instruction %i is not implemented in B2R2." ins.Address
 
 let parse cache =
   let rec disasm hdl bp =
