@@ -72,12 +72,15 @@ let lookPrevInst cache =
     | _ -> 0UL
   cache.EndbrCache.RemoveWhere (fun addr ->
     let prevAddr = prevInstAddr addr
-    let prevInst = cache.LinearCache.[prevAddr]
-    if isReturnTwice cache prevInst then
-      cache.NumReturnTwice <- cache.NumReturnTwice + 1
-      true
-    /// elif isFallThrough cache prevInst then false
-    else false
+    match cache.LinearCache.TryGetValue(prevAddr) with
+    | (true, prevInst) ->
+        if isReturnTwice cache prevInst then
+            cache.NumReturnTwice <- cache.NumReturnTwice + 1
+            true
+        /// elif isFallThrough cache prevInst then false
+        else false
+    | (false, _) ->
+        false
   )
   |> ignore
 
